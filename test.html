@@ -75,21 +75,6 @@
 
     // 搜索文件
     function searchFiles() {
-      const reader = new FileReader();
-      const selectedFile = document.getElementById('indexedFiles').files[0];
-      reader.onload = function(event){
-        const fileContent = event.target.result;
-        const keyword = document.getElementById('keyword').value;
-        const regex = new RegExp(keyword, 'gi');
-        const match = fileContent.match(regex);
-        if (match) {
-          alert(`Keyword '${keyword}' was found ${match.length} times in the file.`);
-        } else {
-          alert(`Keyword '${keyword}' was not found in the file.`);
-        }
-      }
-      reader.readAsText(selectedFile);
-      
       const keyword = document.getElementById('keyword').value;
       const resultsContainer = document.getElementById('results');
       resultsContainer.innerHTML = '';
