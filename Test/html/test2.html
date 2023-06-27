@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>APP文件检索系统</title>
+</head>
+<body>
+  <script src="search.py"></script>
+  <h2>APP文件检索系统</h2>
+
+  <label for="folder">选择查询目录：</label>
+  <input type="file" id="folder" webkitdirectory directory multiple>
+  
+  <br><br>
+  
+  <label for="keyword">输入查询关键字：</label>
+  <input type="text" id="keyword">
+  <button onclick="searchFiles()">搜索</button>
+  
+  <br><br>
+  
+  <ul id="results"></ul>
+  
+  <br><br>
+  
+  <button onclick="saveSelectedResults()">保存选中结果到文本并下载</button>
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 10px;
+    }
+    input[type="text"], input[type="file"], select {
+      margin: 10px;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    input[type="submit"], button {
+      margin: 10px;
+      padding: 5px 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: #007bff;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    input[type="submit"]:hover, button:hover {
+      background-color: #0069d9;
+    }
+  </style>
+
+  <script>
+    let indexedFiles = [];
+    let selectedResults = [];
+
+    // 建立索引
+    function indexFiles(files) {
+      indexedFiles = [];
+      
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.name.endsWith('.pdf') || file.name.endsWith('.doc') || file.name.endsWith('.docx')) {
+          indexedFiles.push(file);
+        }
+      }
+      
+      console.log('已建立索引的文件：', indexedFiles);
+    }
+
+    // 搜索文件
+    function searchFiles() {
+      const keyword = document.getElementById('keyword').value;
+      const resultsContainer = document.getElementById('results');
+      resultsContainer.innerHTML = '';
+      
+      if (keyword.trim().length === 0) {
+        return;
+      }
+      
+      const matchedFiles = indexedFiles.filter(file => file.name.toLowerCase().includes(keyword.toLowerCase()));
+      
+      for (let i = 0; i < matchedFiles.length; i++) {
+        const li = document.createElement('li');
+        const filePath = document.createElement('p');
+        filePath.textContent = formatFilePath(matchedFiles[i].webkitRelativePath);
+        li.appendChild(filePath);
+
+        const ul = document.createElement('ul');
+        const lines = getMatchingLines(matchedFiles[i].webkitRelativePath, keyword);
+        
+        for (let j = 0; j < lines.length; j++) {
+          const line = document.createElement('li');
+          line.textContent = formatLineNumber(lines[j].lineNumber);
+          
+          const content = document.createElement('p');
+          content.textContent = lines[j].lineContent;
+          
+          line.appendChild(content);
+          ul.appendChild(line);
+        }
+        
+        li.appendChild(ul);
+        resultsContainer.appendChild(li);
+      }
+    }
+
+    // 格式化文件路径
+    function formatFilePath(filePath) {
+      const pathArray = filePath.split('/');
+      const fileName = pathArray.pop();
+      const formattedPath = pathArray.join('\\');
+      
+      return formattedPath + '\\' + fileName;
+    }
+
+    // 获取包含关键字的行信息
+    function getMatchingLines(filePath, keyword) {
+      // 模拟获取行号和内容，需根据实际情况修改
+      const lines = [
+        { lineNumber: 12, lineContent: '这是包括关键字的内容行1' },
+        { lineNumber: 28, lineContent: '这是包括关键字的内容行2' },
+        { lineNumber: 35, lineContent: '这是包括关键字的内容行3' },
+      ];
+
+      return lines;
+    }
+
+    // 格式化行号
+    function formatLineNumber(lineNumber) {
+      return '行号' + lineNumber;
+    }
+
+    // 保存选中结果到文本并下载
+    function saveSelectedResults() {
+      if (selectedResults.length === 0) {
+        return;
+      }
+      
+      const filename = 'selected_results.txt';
+      let content = '';
+      
+      for (let i = 0; i < selectedResults.length; i++) {
+        content += selectedResults[i] + '\n';
+      }
+      
+      const element = document.createElement('a');
+      element.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(content);
+      element.download = filename;
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      
+      element.click();
+      
+      document.body.removeChild(element);
+    }
+
+    const folderInput = document.getElementById('folder');
+    folderInput.addEventListener('change', function() {
+      const files = Array.from(folderInput.files);
+      indexFiles(files);
+    });
+  </script>
+</body>
+</html>
