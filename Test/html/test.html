@@ -1,142 +1,84 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>APP文件检索系统</title>
+    <meta charset="UTF-8">
+    <title>文件检索系统</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        #directory-form {
+            margin-bottom: 20px;
+        }
+
+        #search-form {
+            margin-bottom: 20px;
+        }
+
+        #results-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        td.checkbox-column {
+            width: 50px;
+        }
+    </style>
 </head>
 <body>
-  <script>src="search.py"</script>
-  <h2>APP文件检索系统</h2>
+    <h1>文件检索系统</h1>
 
-  <label for="folder">选择查询目录：</label>
-  <input type="file" id="folder" webkitdirectory directory multiple>
-  
-  <br><br>
-  
-  <label for="keyword">输入查询关键字：</label>
-  <input type="text" id="keyword">
-  <button onclick="searchFiles()">搜索</button>
-  
-  <br><br>
-  
-  <ul id="results"></ul>
-  
-  <br><br>
-  
-  <button onclick="saveSelectedResults()">保存选中结果到文本并下载</button>
-  
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-    }
-    form {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 10px;
-    }
-    input[type="text"], input[type="file"], select {
-      margin: 10px;
-      padding: 5px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-    input[type="submit"], button {
-      margin: 10px;
-      padding: 5px 10px;
-      border: none;
-      border-radius: 5px;
-      background-color: #007bff;
-      color: #fff;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    input[type="submit"]:hover, button:hover {
-      background-color: #0069d9;
-    }
-  </style>
+    <form id="directory-form" method="POST">
+        <label for="directory">选择目录:</label>
+        <input type="file" id="directory" name="directory" webkitdirectory directory multiple>
+        <button type="submit">建立索引</button>
+    </form>
 
-  <script>
-    let indexedFiles = [];
-    let selectedResults = [];
+    <form id="search-form" action="/search">
+        <label for="keyword">关键字:</label>
+        <input type="text" id="keyword" name="keyword" placeholder="输入查询关键字" required>
+        <button type="submit">搜索</button>
+    </form>
 
-    // 建立索引
-    function indexFiles(files) {
-      indexedFiles = [];
-      
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        if (file.name.endsWith('.pdf') || file.name.endsWith('.doc') || file.name.endsWith('.docx')) {
-          indexedFiles.push(file);
-        }
-      }
-      
-      console.log('已建立索引的文件：', indexedFiles);
-    }
+    {% if keyword %}
+        <h2>查询结果: "{{ keyword }}"</h2>
+    {% endif %}
 
-    // 搜索文件
-    function searchFiles() {
-      const keyword = document.getElementById('keyword').value;
-      const resultsContainer = document.getElementById('results');
-      resultsContainer.innerHTML = '';
-      
-      if (keyword.trim().length === 0) {
-        return;
-      }
-      
-      const matchedFiles = indexedFiles.filter(file => file.name.toLowerCase().includes(keyword.toLowerCase()));
-      
-      for (let i = 0; i < matchedFiles.length; i++) {
-        const li = document.createElement('li');
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.value = matchedFiles[i].name;
-        checkbox.addEventListener('change', function() {
-          if (this.checked) {
-            selectedResults.push(this.value);
-          } else {
-            const index = selectedResults.indexOf(this.value);
-            if (index > -1) {
-              selectedResults.splice(index, 1);
-            }
-          }
-        });
-        
-        li.appendChild(checkbox);
-        li.appendChild(document.createTextNode(matchedFiles[i].name));
-        resultsContainer.appendChild(li);
-      }
-    }
+    <table id="results-table">
+        <thead>
+            <tr>
+                <th class="checkbox-column">选择</th>
+                <th>文件名</th>
+                <th>内容</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr>
+                <td class="checkbox-column">
+                    <input type="checkbox" name="result" value="{{ result[0] }}">
+                </td>
+                <td>{{ result[1] }}</td>
+                <td>{{ result[4] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-    // 保存选中结果到文本并下载
-    function saveSelectedResults() {
-      if (selectedResults.length === 0) {
-        return;
-      }
-      
-      const filename = 'selected_results.txt';
-      let content = '';
-      
-      for (let i = 0; i < selectedResults.length; i++) {
-        content += selectedResults[i] + '\n';
-      }
-      
-      const element = document.createElement('a');
-      element.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(content);
-      element.download = filename;
-      element.style.display = 'none';
-      document.body.appendChild(element);
-      
-      element.click();
-      
-      document.body.removeChild(element);
-    }
-
-    const folderInput = document.getElementById('folder');
-    folderInput.addEventListener('change', function() {
-      const files = Array.from(folderInput.files);
-      indexFiles(files);
-    });
-  </script>
+    <form action="/save" method="POST">
+        <button type="submit">保存选中的结果并下载</button>
+    </form>
 </body>
 </html>
