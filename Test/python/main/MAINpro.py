@@ -154,36 +154,54 @@ def center():
         name = request.args.get('key_word')  # args取get方式参数
         for f_name in get_all_files(path):
             document_path = path+"\\"+f_name
+
+
+            #判断是否为pdf文件
             index = document_path.find('.pdf')
             if index != -1:
-                l1.append(document_path)
-                l1.append(str_s)
-                pdf_txt(document_path,txt_path)
                 f = open(txt_path,'r')
                 key_word = name
                 i = 1
+                bol = 0
                 lines = f.readlines()
+                for line in lines:
+                    if re.search(key_word,line):
+                        bol = 1
+                        break
+                if bol == 1:
+                    l1.append(document_path)
+                    l1.append(str_s)
+                pdf_txt(document_path,txt_path)
                 for line in lines:
                     if re.search(key_word,line):
                         ls = f'line{i,line}'
                         l1.append(ls)
                     i = i+1
-            index2 = path.find('.docx')
+            
+            #判断是否为word文件
+
+            index2 = document_path.find('.docx')
             if index2 != -1:
-                l1.append(document_path)
-                l1.append(str_s)
-                word_txt(document_path,txt_path)
                 f = open(txt_path,'r')
                 key_word = name
                 i = 1
+                bol = 0
                 lines = f.readlines()
+                for line in lines:
+                    if re.search(key_word,line):
+                        bol = 1
+                        break
+                if bol == 1:
+                    l1.append(document_path)
+                    l1.append(str_s)
+                word_txt(document_path,txt_path)
                 for line in lines:
                     if re.search(key_word,line):
                         ls = f'line{i,line}'
                         l1.append(ls)
                     i = i+1
         # return "路径：%s\n ************\n 行号：%d 对应关键行：%s" % (document_path, i, line)
-        return render_template('test3.html',lines = l1)
+        return render_template('test3.html',lines = l1,data = name)
 
 @app.route('/download')
 def download():
