@@ -35,5 +35,27 @@
             {% endfor %}
             </pre>
     </form>
+     <style>
+        .highlight {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+    <script>
+        function highlightKeywords() {
+            var content = document.getElementById('content');
+            var text = content.innerHTML;
+
+            for (var i = 0; i < keywords.length; i++) {
+                var keyword = keywords[i];
+                var regex = new RegExp(keyword, 'gi');
+                text = text.replace(regex, '<span class="highlight">$&</span>');
+            }
+
+            content.innerHTML = text;
+        }
+
+        highlightKeywords();
+    </script>
 </body>
 </html>
