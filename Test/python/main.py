@@ -1,9 +1,11 @@
+from flask import Flask, request, render_template
 import re
 import PyPDF2
 import os
 from docx import Document
 import win32com.client as win32
 import os
+from flask import send_file
 
 document_path = 'C:\\Users\\DELL\\Desktop\\课程文件\\短学期测试\\2-327.docx'
 output_path = 'out.txt'
@@ -87,5 +89,24 @@ if index != -1:
 index2 = document_path.find('.docx')
 if index2 != -1:
     txt_search(word_txt(document_path,output_path))
+@app.route('/download')
+def download():
+    # 获取需要保存的数据（document_path、i和line）并进行处理
+    data = ""  # 将需要保存的数据拼接成一个字符串
+    file_name = "search_results.txt"  # 下载的文件名
+
+    # 将数据保存到文件中
+    with open(file_name, "w") as file:
+        file.write(data)
+
+    # 返回文件给用户下载
+    return send_file(file_name, as_attachment=True)
+
+
+
+
+
+if __name__ == '__main__':
+    app.run()
 
 
