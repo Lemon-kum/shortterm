@@ -42,8 +42,9 @@
         }
     </style>
     <script>
-        function highlightKeywords() {
-            var keywords = ['and'];
+        var keyword = '{{ data }}';
+        function highlightKeywords(keyword) {
+            var keywords = [keyword];
             var content = document.getElementById('content');
             var text = content.innerHTML;
 
@@ -56,7 +57,7 @@
             content.innerHTML = text;
         }
 
-        highlightKeywords();
+        highlightKeywords(keyword);
     </script>
 </body>
 </html>
