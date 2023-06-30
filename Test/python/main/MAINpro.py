@@ -41,39 +41,18 @@ def pdf_txt(document_path,txt_path):
 
 
 #.........word转txt
-def word_txt(document_path,txt_path):
-# 打开DOCX文件
-    doc_path = document_path
-    doc = Document(doc_path)
+def word_txt(document_path, txt_path):
+    # 使用python-docx库加载Word文档
+    doc = Document(document_path)
 
-# 保存为临时的DOC文件
-    temp_doc_path = 'temp.doc'
-    doc.save(temp_doc_path)
+    # 打开txt文件，准备写入内容
+    with open(txt_path, 'w') as txt_file:
+        # 遍历文档的每个段落
+        for para in doc.paragraphs:
+            line = para.text.strip()  # 获取段落的文本内容，并去除首尾空格
+            if line:  # 如果内容不为空，则写入txt文件
+                txt_file.write(line + '\n')
 
-# 指定输出PDF文件路径
-    pdf_path = document_path.replace('.docx','.pdf')
-
-# 创建Word应用程序实例
-    word = win32.gencache.EnsureDispatch('Word.Application')
-
-    try:
-    # 打开临时的DOC文件
-        doc_word = word.Documents.Open(os.path.abspath(temp_doc_path))
-
-    # 将DOC文件另存为PDF
-        doc_word.SaveAs(os.path.abspath(pdf_path), FileFormat=17)
-
-    finally:
-    # 关闭Word应用程序并退出
-        if doc_word:
-            doc_word.Close()
-        word.Quit()
-
-# 删除临时的DOC文件
-    os.remove(temp_doc_path)
-
-    print(f"DOCX文件已成功转换为PDF：{pdf_path}")
-    pdf_txt(pdf_path,txt_path)
     return txt_path
 
 
@@ -147,6 +126,49 @@ def index():
             })
 
     return render_template('test3.html', current_path=current_path, parent_path=parent_path, file_list=file_list)
+
+server = 'localhost'
+database = 'shortterm'
+username = 'sa'
+password = 'wxLk1009.'
+print(testpath)
+# 建立数据库连接
+conn = pyodbc.connect(f'DRIVER={{SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}')
+
+def index_folder(testpath):
+    folder_path = testpath
+
+    # 创建文件索引表
+    cursor = conn.cursor()
+    cursor.execute('''IF NOT EXISTS (SELECT * FROM sys.tables WHERE name='file_index')
+                      CREATE TABLE file_index (
+                          id INT IDENTITY(1,1) PRIMARY KEY,
+                          filename varchar(100),
+                          path varchar(100)
+                      );''')
+
+    # 遍历文件夹并索引匹配的文件
+    for root, dirs, files in os.walk(folder_path):
+        for filename in files:
+            print(1111)
+            if filename.endswith('.pdf') or filename.endswith('.docx'):
+                file_path = os.path.join(root, filename)
+                print(file_path)
+                print(filename)
+                # 将文件信息插入数据库
+                cursor.execute('INSERT INTO file_index (filename, path) VALUES (?, ?)', (filename, file_path))
+
+    # 提交并关闭数据库连接
+    cursor.commit()
+    cursor.close()
+
+    return '索引建立成功！'
+
+# 调用索引函数
+index_folder(testpath)
+
+# 关闭数据库连接
+conn.close()
 
 @app.route('/center/add')
 def center():
