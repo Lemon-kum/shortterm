@@ -92,7 +92,7 @@ def word_txt(document_path, txt_path):
 
 app = Flask(__name__)
 
-testpath = []
+testpath = ''
 l1 = []
 str_s = '-----------------------------'
 @app.route('/')
