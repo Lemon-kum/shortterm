@@ -23,17 +23,18 @@
         {% endif %}
     {% endfor %}
     <br>
-    <form action="/center/add" method="GET">
+    <form action="/center/add" method="GET" onsubmit="searchFiles(); return false;">
         关键字：<input type="text" name="key_word">
         <input type="submit" value="搜索">
         {% if lines %}
         <a href="/download" class="save-button">保存</a>
-        {% endif %}
+        
         <pre>
             {% for line in lines %}
                 {{ line }}
             {% endfor %}
             </pre>
+        {% endif %}
     </form>
      <style>
         .highlight {
