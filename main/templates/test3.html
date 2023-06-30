@@ -1,0 +1,71 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>文件目录浏览</title>
+</head>
+<body>
+    <h1>文件目录浏览</h1>
+
+    {% if parent_path %}
+        <a href="/?path={{ parent_path }}">返回上级目录</a><br><br>
+    {% endif %}
+
+    <h3>{{ current_path }}</h3>
+
+    {% for item in file_list %}
+        {% if item.type == 'file' %}
+            {{ item.name }} (文件)<br>
+        {% elif item.type == 'directory' %}
+            <a href="/?path={{ item.path }}">{{ item.name }}</a> (目录)<br>
+        {% endif %}
+    {% endfor %}
+    <br>
+    <form action="/center/add" method="GET" onsubmit="searchFiles(); return false;" >
+        关键字：<input id="keyword-input"  type="text" name="key_word">
+        <input type="submit" value="搜索">
+    </form>
+    
+        {% if lines %}
+        <a href="/download" class="save-button">保存</a>
+        
+        <pre id = 'content'>
+            {% for line in lines %}
+                {{ line }}
+            {% endfor %}
+        
+            </pre>
+        {% endif %}
+    </form>
+
+    <style>
+        .highlight {
+            color: red;
+            font-weight: bold;
+        }
+    </style>
+    <script>
+        var keyword = '{{ data }}';
+        console.log(keyword);
+
+        
+        function highlightKeywords(keyword) {
+            var keywords = [keyword];
+            var content = document.getElementById('content');
+            var text = content.innerHTML;
+
+            for (var i = 0; i < keywords.length; i++) {
+                var keyword = keywords[i];
+                var regex = new RegExp(keyword, 'gi');
+                text = text.replace(regex, '<span class="highlight">$&</span>');
+            }
+
+            content.innerHTML = text;
+        }
+        highlightKeywords(keyword)
+
+    </script>
+</body>
+</html>
